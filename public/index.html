@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+        <div class="logo"><img src="../intuilearn_logo.png"></div>
+        <div class="title-bar">
+            <h1>intuiLearn</h1>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="left-section">
+            <div class="box">
+                <h1>To know</h1>
+                <p id="toknow"></p>
+            </div>
+            <div class="box">
+                <h1>Known</h1>
+                <p id="known"></p>
+            </div>
+            <div class="progress">
+                <div id="bar"></div>
+            </div>
+        </div>
+        <div class="right-section">
+            
+            <!-- Input Section aligned with progress -->
+            <div id="chatBox"></div>
+            <div class="input-group">
+              <input type="text" id="userInput" placeholder="Type your message" class="question-input">
+              <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+            
+          </div>
+      </div>
+  </div>
+  
+    <script>
+        let chatHistory = []; // Initialize chat history
+
+        async function sendMessage() {
+            const userInput = document.getElementById("userInput").value.trim();
+            if (userInput === "") return;
+            console.log(chatHistory);
+            try {
+                const options = {
+                    method: "POST",
+                    body: JSON.stringify({
+                        history: chatHistory,
+                        message: userInput,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                };
+
+                const response = await fetch("http://localhost:3000/gemini", options); // First, get the AI response
+                const data = await response.json();
+
+                // Update chat history
+                chatHistory.push({ role: "user", parts: [{ text: userInput }] });
+                chatHistory.push({ role: "model", parts: [{ text: data.socratic }] });
+
+                addMessageToChat(userInput, "user-message");
+                addMessageToChat(data.socratic, "ai-message");
+                document.getElementById('toknow').innerHTML = data.toknow;
+                document.getElementById('known').innerHTML = data.known;
+                document.getElementById('bar').innerHTML = data.score+`%`;
+                document.getElementById('bar').style.width = data.score+`%`;
+
+            } catch (error) {
+                console.error(error);
+                alert("Something went wrong!");
+            }
+        }
+
+        function addMessageToChat(message, type) {
+            const chatBox = document.getElementById("chatBox");
+            const newMessage = document.createElement("div");
+            newMessage.className = type;
+            newMessage.textContent = message;
+            chatBox.appendChild(newMessage);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+        }
+    </script>
+</body>
+</html>
