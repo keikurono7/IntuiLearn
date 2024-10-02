@@ -18,7 +18,7 @@ app.use(cors({
 app.use(express.static("public"));
 app.use(express.json());
 
-const genAI = new GoogleGenerativeAI("AIzaSyDIj_BIwaYHQoNKDkZxdf1IZ3KtMS5lk2Y");
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Handle chat requests
 app.post("/gemini", async (req, res) => {
